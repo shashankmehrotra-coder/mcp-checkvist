@@ -8,7 +8,7 @@ Once configured, you can talk to Claude naturally about your tasks:
 
 > *"What's open in my Work checklist?"*
 > *"Create a task called 'Review Q3 report' under the Planning section, due Friday"*
-> *"Search all my lists for anything related to HDFC"*
+> *"Search all my lists for anything related to Project-X"*
 > *"Show me everything overdue across all my checklists"*
 
 ---
