@@ -138,7 +138,7 @@ Show me everything due in the next 7 days across all my lists
 ### Search across everything
 
 ```
-Search all my checklists for "HDFC"
+Search all my checklists for "Project-X"
 ```
 
 ### Create a task
