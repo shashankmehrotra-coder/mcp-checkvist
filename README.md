@@ -1,23 +1,39 @@
 # checkvist-mcp
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that connects [Claude](https://claude.ai) to [Checkvist](https://checkvist.com) — giving you full task management capabilities directly in your Claude conversations.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server for [Checkvist](https://checkvist.com) — gives any MCP-compatible AI assistant full access to your tasks, lists, and notes.
+
+## Compatible clients
+
+This server uses the standard MCP stdio transport and works with **any MCP-compatible client**, including:
+
+| Client | Notes |
+|--------|-------|
+| [Claude Code](https://claude.ai/code) | Anthropic's CLI — add to `~/.claude/settings.json` |
+| [Claude Desktop](https://claude.ai/download) | Anthropic's desktop app — add to `claude_desktop_config.json` |
+| [Cursor](https://cursor.sh) | Add to `.cursor/mcp.json` |
+| [Windsurf](https://codeium.com/windsurf) | Add to MCP settings |
+| [Continue](https://continue.dev) | Add to `config.json` |
+| [Zed](https://zed.dev) | Add to `settings.json` |
+| Any client | implementing the [MCP specification](https://spec.modelcontextprotocol.io) |
+
+---
 
 ## What it does
 
-Once configured, you can talk to Claude naturally about your tasks:
+Once configured, you can talk to your AI assistant naturally about your Checkvist tasks:
 
 > *"What's open in my Work checklist?"*
 > *"Create a task called 'Review Q3 report' under the Planning section, due Friday"*
-> *"Search all my lists for anything related to HDFC"*
+> *"Search all my lists for anything related to the budget"*
 > *"Show me everything overdue across all my checklists"*
 
 ---
 
-## Tools available
+## Tools
 
 | Tool | Description |
 |------|-------------|
-| `list_checklists` | List all your Checkvist lists with open/total counts and % complete |
+| `list_checklists` | List all Checkvist lists with open/total counts and % complete |
 | `get_tasks` | Full flattened view of a list: every task with its complete hierarchy path (e.g. `Project > Area > Task`) |
 | `get_open_tasks` | Only the open (incomplete) tasks from a list — ideal for daily reviews |
 | `get_due_tasks` | All open tasks with due dates, optionally filtered by how many days ahead |
@@ -35,19 +51,19 @@ Once configured, you can talk to Claude naturally about your tasks:
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org) v20 or later (uses the built-in `--env-file` flag)
+- [Node.js](https://nodejs.org) v20 or later
 - A [Checkvist](https://checkvist.com) account
-- [Claude Code](https://claude.ai/code) or another MCP-compatible Claude client
+- Any MCP-compatible client (see table above)
 
 ---
 
-## Setup
+## Installation
 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-username/checkvist-mcp.git
-cd checkvist-mcp
+git clone https://github.com/shashankmehrotra-coder/mcp-checkvist.git
+cd mcp-checkvist
 npm install
 ```
 
@@ -70,11 +86,23 @@ CHECKVIST_USERNAME=your-email@example.com
 CHECKVIST_API_KEY=your-remote-api-key
 ```
 
-> **Security note:** `.env` is listed in `.gitignore` and will never be committed. Never share your API key or commit it to source control.
+> **Security:** `.env` is listed in `.gitignore` and will never be committed. Never share your API key or commit it to source control.
 
-### 4. Configure Claude Code
+---
 
-Add the server to your Claude Code global settings (`~/.claude/settings.json`):
+## Client configuration
+
+The server command is always:
+
+```
+node --env-file=/absolute/path/to/mcp-checkvist/.env /absolute/path/to/mcp-checkvist/index.js
+```
+
+Replace `/absolute/path/to/mcp-checkvist` with where you cloned this repo. Config snippets for each client are shown below.
+
+### Claude Code
+
+Add to `~/.claude/settings.json`:
 
 ```json
 {
@@ -82,19 +110,90 @@ Add the server to your Claude Code global settings (`~/.claude/settings.json`):
     "checkvist": {
       "command": "node",
       "args": [
-        "--env-file=/absolute/path/to/checkvist-mcp/.env",
-        "/absolute/path/to/checkvist-mcp/index.js"
+        "--env-file=/absolute/path/to/mcp-checkvist/.env",
+        "/absolute/path/to/mcp-checkvist/index.js"
       ]
     }
   }
 }
 ```
 
-Replace `/absolute/path/to/checkvist-mcp` with the actual path where you cloned this repo.
+Restart Claude Code fully after saving.
 
-### 5. Restart Claude Code
+### Claude Desktop
 
-Fully quit and relaunch Claude Code. The MCP server loads at startup. You should see `checkvist` in the connected servers list.
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "checkvist": {
+      "command": "node",
+      "args": [
+        "--env-file=/absolute/path/to/mcp-checkvist/.env",
+        "/absolute/path/to/mcp-checkvist/index.js"
+      ]
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving.
+
+### Cursor
+
+Add to `.cursor/mcp.json` in your home directory or project root:
+
+```json
+{
+  "mcpServers": {
+    "checkvist": {
+      "command": "node",
+      "args": [
+        "--env-file=/absolute/path/to/mcp-checkvist/.env",
+        "/absolute/path/to/mcp-checkvist/index.js"
+      ]
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add to Windsurf's MCP settings (Preferences → MCP):
+
+```json
+{
+  "mcpServers": {
+    "checkvist": {
+      "command": "node",
+      "args": [
+        "--env-file=/absolute/path/to/mcp-checkvist/.env",
+        "/absolute/path/to/mcp-checkvist/index.js"
+      ]
+    }
+  }
+}
+```
+
+### Alternative: pass credentials via environment block
+
+If your client supports an `env` block in the MCP config, you can skip the `--env-file` flag:
+
+```json
+{
+  "mcpServers": {
+    "checkvist": {
+      "command": "node",
+      "args": ["/absolute/path/to/mcp-checkvist/index.js"],
+      "env": {
+        "CHECKVIST_USERNAME": "your-email@example.com",
+        "CHECKVIST_API_KEY": "your-remote-api-key"
+      }
+    }
+  }
+}
+```
 
 ---
 
@@ -113,8 +212,9 @@ Get all tasks from my "Work Projects" checklist
 ```
 
 Output looks like:
+
 ```
-[ ] Work Projects — 42 tasks shown
+Work Projects — 42 tasks shown
 
 [ ] Strategy > Q4 Planning > Define OKRs
 [ ] Strategy > Q4 Planning > Align with leadership
@@ -123,7 +223,7 @@ Output looks like:
 ...
 ```
 
-### Daily standup view
+### Daily review
 
 ```
 Show me all open tasks in my "Inbox" checklist
@@ -138,7 +238,7 @@ Show me everything due in the next 7 days across all my lists
 ### Search across everything
 
 ```
-Search all my checklists for "HDFC"
+Search all my checklists for "budget"
 ```
 
 ### Create a task
@@ -150,8 +250,7 @@ Create a task "Prepare slide deck" in my "Work Projects" checklist, due 2025-06-
 ### Create a nested task
 
 ```
-First get the tasks from "Work Projects" so I can find the parent ID, 
-then create "Research competitors" nested under task 12345
+Get tasks from "Work Projects", then create "Research competitors" under task 12345
 ```
 
 ### Complete a task
@@ -174,7 +273,7 @@ Give me stats for my "Work Projects" checklist
 
 ---
 
-## Configuration options
+## Configuration reference
 
 The server reads two environment variables:
 
@@ -183,54 +282,36 @@ The server reads two environment variables:
 | `CHECKVIST_USERNAME` | Your Checkvist account email |
 | `CHECKVIST_API_KEY` | Your Remote API key from your profile page |
 
-You can pass these via:
-- A `.env` file with `--env-file` (recommended, shown above)
-- System environment variables
-- The `env` block in your MCP server config in `settings.json`
-
----
-
-## Using with other MCP clients
-
-This server uses the standard [MCP stdio transport](https://modelcontextprotocol.io/docs/concepts/transports) and works with any compatible client. The command to start it is:
-
-```bash
-node --env-file=/path/to/.env /path/to/index.js
-```
-
-Or, if you've set environment variables another way:
-
-```bash
-CHECKVIST_USERNAME=you@example.com CHECKVIST_API_KEY=yourkey node /path/to/index.js
-```
-
 ---
 
 ## Troubleshooting
 
 **"CHECKVIST_USERNAME and CHECKVIST_API_KEY environment variables are required"**
-→ Make sure your `.env` file exists and is being passed via `--env-file`, or that the env vars are set in your shell / MCP config.
+→ Check that your `.env` file exists and is being passed via `--env-file`, or that the env vars are set in the `env` block of your client config.
 
 **"Checkvist auth failed (HTTP 401)"**
 → Your API key is wrong or expired. Regenerate it at [checkvist.com/auth/profile](https://checkvist.com/auth/profile).
 
 **"No checklist named X"**
-→ Checklist names are case-insensitive but must match exactly. Use `list_checklists` to see the exact names.
+→ Checklist names are case-insensitive but must match exactly. Use `list_checklists` to see exact names and IDs.
 
-**Server not appearing in Claude Code**
-→ Make sure you fully quit and relaunched Claude Code after editing `settings.json`. Use absolute paths for both the `.env` file and `index.js`.
+**Server not appearing after configuration**
+→ Most clients require a full restart after editing the config file. Use absolute paths — relative paths often fail depending on how the client launches the process.
+
+**Node.js version errors**
+→ The `--env-file` flag requires Node.js v20+. Check with `node --version`.
 
 ---
 
 ## About Checkvist
 
-[Checkvist](https://checkvist.com) is a keyboard-driven outliner and task manager that supports deep hierarchical nesting, tags, due dates, and a clean REST API. This MCP server uses the [Checkvist Open API](https://checkvist.com/auth/api).
+[Checkvist](https://checkvist.com) is a keyboard-driven outliner and task manager with deep hierarchical nesting, tags, due dates, and a clean REST API. This server uses the [Checkvist Open API](https://checkvist.com/auth/api).
 
 ---
 
 ## Contributing
 
-Issues and PRs welcome. The server is a single file (`index.js`) — adding a new tool is straightforward: follow the pattern of any existing `server.tool(...)` block.
+Issues and PRs welcome. The entire server is a single file (`index.js`) — adding a new tool means following the pattern of any existing `server.tool(...)` block.
 
 ## License
 

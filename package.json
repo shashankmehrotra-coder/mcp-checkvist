@@ -1,7 +1,7 @@
 {
   "name": "checkvist-mcp",
   "version": "1.0.0",
-  "description": "MCP server for Checkvist — manage tasks, lists, and notes from Claude",
+  "description": "MCP server for Checkvist — manage tasks, lists, and notes from any MCP-compatible AI assistant",
   "type": "module",
   "main": "index.js",
   "bin": {
@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node index.js"
   },
-  "keywords": ["mcp", "checkvist", "tasks", "claude", "modelcontextprotocol"],
+  "keywords": ["mcp", "checkvist", "tasks", "modelcontextprotocol", "cursor", "ai-assistant"],
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0"
